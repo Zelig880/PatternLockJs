@@ -1,0 +1,28 @@
+{
+  "name": "pattern-lock-js",
+  "version": "1.0.0",
+  "description": "Easy to use Pattern Lock library to emulate mobile phones lock screens",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zelig880/PatternLockJs.git"
+  },
+  "keywords": [
+    "pattern",
+    "pattern",
+    "lock",
+    "authentication"
+  ],
+  "author": "Zelig880",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zelig880/PatternLockJs/issues"
+  },
+  "homepage": "https://github.com/Zelig880/PatternLockJs#readme",
+  "devDependencies": {
+    "jasmine": "^3.1.0"
+  }
+}
