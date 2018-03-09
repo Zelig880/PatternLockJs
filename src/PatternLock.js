@@ -12,6 +12,7 @@
         
         let _destinationElement;
         let _canvasContext;
+        let _buttonsInfo = [];
 
         let _configuration = {
             elementId: '',
@@ -39,10 +40,12 @@
         var hiddenInput = _createHiddenInput();
 
         _canvasContext = canvas.getContext("2d");
+        _calculateButtonInfo();
         _createPatternButtons();
 
         _appendToDestinationElement(canvas);
         _appendToDestinationElement(hiddenInput);
+        _listenToCanvasClick(canvas, _buttonsInfo);
 
         function getConfig(){
             return _configuration;
@@ -92,23 +95,31 @@
             _destinationElement.append(elementToAppend);
         }
 
-        function _createPatternButtons(){
+        function _calculateButtonInfo(){
 
             for (let row = 0; row < _configuration.buttonsRow; row++) {
                 
                 for (let column = 0; column < _configuration.buttonsColumn; column++) {
                 
-                    const buttonInfo = _calculateButtonPositionAndSize(row, column);
-                    _createPatternButton(buttonInfo);
+                    _buttonsInfo.push(_calculateButtonPositionAndSize(row, column));
 
                 }
                 
             }
         }
 
+        function _createPatternButtons(){
+            
+                for (let i = 0; i < _buttonsInfo.length; i++) {
+                
+                    _createPatternButton(_buttonsInfo[i]);
+
+                }
+        }
+
         function _createPatternButton(buttonInfo){
             _canvasContext.beginPath();
-            _canvasContext.arc(buttonInfo.x,buttonInfo.y,buttonInfo.radius,0,2*Math.PI);
+            _canvasContext.arc(buttonInfo.centerX,buttonInfo.centerY,buttonInfo.radius,0,2*Math.PI);
             _canvasContext.stroke();
         }
 
@@ -116,11 +127,15 @@
 
             var values = {};
 
+            values.row = row;
+            values.column = column;
             values.unitWidth = _configuration.canvasWidth / _configuration.buttonsColumn;
             values.unitHeight = _configuration.canvasHeight / _configuration.buttonsRow;
             values.radius = _calculateButtonRadius(values.unitWidth, values.unitHeight, _configuration.buttonsPadding);
-            values.x = (values.unitWidth / 2 ) + ( column * values.unitWidth);
-            values.y = (values.unitHeight / 2 ) + ( row * values.unitHeight);
+            values.x = ( column * values.unitWidth);
+            values.y = ( row * values.unitHeight);
+            values.centerX = (values.unitWidth / 2) + ( column * values.unitWidth);
+            values.centerY = (values.unitHeight / 2) + ( row * values.unitHeight);
             
             return values;
         }
@@ -131,6 +146,39 @@
             var size = (minSize / 2) - padding;
 
             return size;
+        }
+
+        function _getMousePos(canvas, event) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
+
+        function _isButton(pos, button){
+            return pos.x > button.x && pos.x < button.x+button.unitWidth && pos.y < button.y+button.unitHeight && pos.y > button.y;
+        }
+
+        function _clickButton(button, index){
+            console.log("Button Clicked", index);
+        }
+
+        function _listenToCanvasClick(canvas, buttonInfo){
+            canvas.addEventListener('mousedown', function(evt) {
+                var mousePos = _getMousePos(canvas, evt);
+                
+                buttonInfo.forEach(function(button, index) {
+
+                    if(_isButton(mousePos, button)){
+
+                         _clickButton(button, index);
+                         return true;
+                    }
+
+                }, this);
+
+            }, false);
         }
 
         return {
