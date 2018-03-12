@@ -13,6 +13,9 @@
         let _destinationElement;
         let _canvasContext;
         let _buttonsInfo = [];
+        let _mouseButtonDown = false;
+        let _lastClickedButton;
+        let _selectedPattern = [];
 
         let _configuration = {
             elementId: '',
@@ -45,7 +48,7 @@
 
         _appendToDestinationElement(canvas);
         _appendToDestinationElement(hiddenInput);
-        _listenToCanvasClick(canvas, _buttonsInfo);
+        _addlistenerToClickEvents(canvas, _buttonsInfo);
 
         function getConfig(){
             return _configuration;
@@ -161,22 +164,72 @@
         }
 
         function _clickButton(button, index){
+
+            if(index !== _lastClickedButton && _selectedPattern.indexOf(index) === -1){
+                _lastClickedButton = index;
+
+                _selectedPattern.push(index);
+
+                console.log("Button Clicked", index);
+            }
+        }
+
+        function _postPatten(){
+            
             console.log("Button Clicked", index);
         }
 
-        function _listenToCanvasClick(canvas, buttonInfo){
+        function _addlistenerToClickEvents(canvas, buttonInfo){
+            _mouseDownEventListener(canvas, buttonInfo);
+            _mouseMoveEventListener(canvas, buttonInfo);
+            _mouseUpEventListener(canvas, buttonInfo);
+        }
+
+        function _mouseDownEventListener(canvas, buttonInfo){
+
             canvas.addEventListener('mousedown', function(evt) {
                 var mousePos = _getMousePos(canvas, evt);
-                
+
                 buttonInfo.forEach(function(button, index) {
 
                     if(_isButton(mousePos, button)){
 
-                         _clickButton(button, index);
-                         return true;
+                        _mouseButtonDown = true;
+                        _clickButton(button, index);
+                        return true;
                     }
 
                 }, this);
+
+            }, false);
+        }
+        
+        function _mouseMoveEventListener(canvas, buttonInfo){
+
+            canvas.addEventListener('mousemove', function(evt) {
+                var mousePos = _getMousePos(canvas, evt);
+                
+                if(!_mouseButtonDown) return;
+
+                buttonInfo.forEach(function(button, index) {
+
+                    if(_isButton(mousePos, button)){
+
+                        _clickButton(button, index);
+                        return true;
+                    }
+
+                }, this);
+
+            }, false);
+        }
+        
+        function _mouseUpEventListener(canvas, buttonInfo){
+
+            canvas.addEventListener('mouseup', function(evt) {
+                var mousePos = _getMousePos(canvas, evt);
+                _mouseButtonDown = false;
+                _postPattern();
 
             }, false);
         }
