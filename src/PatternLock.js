@@ -8,13 +8,75 @@
 (function (global) {
     'use strict';
 
+    var animationHelper = function(canvas){
+
+        let _animate = false;
+        let _startX = null;
+        let _startY = null;
+        const _canvas = canvas;
+        const _ctx = canvas.getContext('2d');
+
+        var animationInit = function(startX, startY){
+            _animate = true;
+            _startX = startX;
+            _startY = startY;
+        }
+
+        var animationStop = function(){
+            _animate = false;
+            _startX = null;
+            _startY = null;
+            _cleanCanvas();
+        }
+
+        var animationUpdate = function(mousePosition){
+
+            if(!_animate) return;
+
+            _drawLine(mousePosition);
+        }
+
+        var _drawLine = function(mousePosition){
+           
+            _cleanCanvas();
+            _ctx.strokeStyle = 'blue';
+            _ctx.lineWidth = 5;
+            _ctx.beginPath();
+            
+            _ctx.moveTo(_startX, _startY);
+            _ctx.lineTo(mousePosition.x, mousePosition.y);
+            _ctx.stroke();
+        }
+
+        var _cleanCanvas = function(){
+
+            _ctx.clearRect(0,0,_canvas.width,_canvas.height);
+
+        }
+
+        var _getMousePos= function(canvas, event) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top
+            };
+        }
+        
+
+        return {
+            animationInit:animationInit,
+            animationUpdate:animationUpdate,
+            animationStop:animationStop
+        }
+    };
+
     var PatternLock = function (elementId, customConfiguration) {
         
         let _destinationElement;
         let _canvasContext;
         let _buttonsInfo = [];
         let _mouseButtonDown = false;
-        let _lastClickedButton;
+        let _lastClickedButton = null;
         let _selectedPattern = [];
 
         let _configuration = {
@@ -39,16 +101,19 @@
 
         Object.assign(_configuration, customConfiguration);
         
-        var canvas = _createCanvas();
+        var mainCanvas = _createCanvas("PatterLock");
+        var animationCanvas = _createCanvas("animationCanvas");
         var hiddenInput = _createHiddenInput();
 
-        _canvasContext = canvas.getContext("2d");
+        _canvasContext = mainCanvas.getContext("2d");
         _calculateButtonInfo();
         _createPatternButtons();
 
-        _appendToDestinationElement(canvas);
+        _appendToDestinationElement(animationCanvas);
+        _appendToDestinationElement(mainCanvas);
         _appendToDestinationElement(hiddenInput);
-        _addlistenerToClickEvents(canvas, _buttonsInfo);
+        _addlistenerToClickEvents(mainCanvas, _buttonsInfo);
+        const _animationHelper = animationHelper(animationCanvas);
 
         function getConfig(){
             return _configuration;
@@ -70,11 +135,11 @@
             return true;
         }
 
-        function _createCanvas(){
+        function _createCanvas(id){
             var canvas;
             
             canvas = document.createElement('canvas');
-            canvas.id     = "PatterLock";
+            canvas.id     = id;
             canvas.width  = _configuration.canvasWidth;
             canvas.height = _configuration.canvasHeight;
             canvas.style.zIndex   = 100;
@@ -160,16 +225,30 @@
         }
 
         function _isButton(pos, button){
-            return pos.x > button.x && pos.x < button.x+button.unitWidth && pos.y < button.y+button.unitHeight && pos.y > button.y;
+            var buttonAccuracy = 0.3;
+            var buttonAccutacyX = buttonAccuracy * button.unitWidth;
+            var buttonAccutacyY = buttonAccuracy * button.unitHeight;
+
+            return pos.x > (button.x + buttonAccutacyX) && pos.x < (button.x+button.unitWidth -  buttonAccutacyX) && pos.y < (button.y+button.unitHeight - buttonAccutacyY) && pos.y > (button.y + buttonAccutacyY);
         }
 
         function _clickButton(button, index){
 
             if(index !== _lastClickedButton && _selectedPattern.indexOf(index) === -1){
-                _lastClickedButton = index;
-
+               
                 _selectedPattern.push(index);
+                
 
+                if(_lastClickedButton !== null){
+                    var lastButton = _buttonsInfo[_lastClickedButton];
+                    _drawLine(lastButton.centerX, lastButton.centerY, button.centerX, button.centerY );
+                    _animationHelper.animationStop();
+
+                }
+                _createFilledCircle(button);
+                _animationHelper.animationInit(button.centerX, button.centerY);
+
+                _lastClickedButton = index;
                 console.log("Button Clicked", index);
             }
         }
@@ -211,6 +290,7 @@
                 
                 if(!_mouseButtonDown) return;
 
+                _animationHelper.animationUpdate(mousePos);
                 buttonInfo.forEach(function(button, index) {
 
                     if(_isButton(mousePos, button)){
@@ -229,15 +309,38 @@
             canvas.addEventListener('mouseup', function(evt) {
                 var mousePos = _getMousePos(canvas, evt);
                 _mouseButtonDown = false;
+                _animationHelper.animationStop();
                 _postPattern();
 
             }, false);
+        }
+
+        function  _drawLine(startPositionX, StartPositionY, endPositionX, endPositionY){
+           
+            _canvasContext.strokeStyle = 'blue';
+            _canvasContext.lineWidth = 5;
+            _canvasContext.beginPath();
+            
+            _canvasContext.moveTo(startPositionX, StartPositionY);
+            _canvasContext.lineTo(endPositionX, endPositionY);
+            _canvasContext.stroke();
+        }
+        
+        function _createFilledCircle(buttonInfo){
+            _canvasContext.beginPath();
+            _canvasContext.strokeStyle = 'blue';
+            _canvasContext.arc(buttonInfo.centerX,buttonInfo.centerY,buttonInfo.radius/ 5,0,2*Math.PI);
+            _canvasContext.fillStyle = 'green';
+            _canvasContext.fill();
+            _canvasContext.lineWidth = 5;
+            _canvasContext.stroke();
         }
 
         return {
             getConfig: getConfig
         }
     };
+
 
     if (typeof define === 'function' && define.amd) {
         define(function () { return PatternLock; });
