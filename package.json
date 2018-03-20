@@ -4,7 +4,8 @@
   "description": "Easy to use Pattern Lock library to emulate mobile phones lock screens",
   "main": "index.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "webpack": "webpack"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,11 @@
   },
   "homepage": "https://github.com/Zelig880/PatternLockJs#readme",
   "devDependencies": {
-    "jasmine": "^3.1.0"
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-es2015-modules-amd": "^6.24.1",
+    "crypto-js": "^3.1.9-1",
+    "jasmine": "^3.1.0",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12"
   }
 }
