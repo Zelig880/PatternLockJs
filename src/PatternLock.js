@@ -5,7 +5,7 @@
  * Description: Pattern Lock library to emulate Mobile phones lock screen in websites
  * 
  */
-import crypto from "../node_modules/crypto-js/index.js";
+import CryptoJS from "crypto-js"
 
 (function (global) {
     'use strict';
@@ -63,12 +63,6 @@ import crypto from "../node_modules/crypto-js/index.js";
         }
     };
 
-    var PatternEncryptionHadler = function(pattern){
-
-        const randomWords = ["witty","scratch","sack","tree","assorted","unhealthy","tricky","advertisement","stomach","light","tease","stretch","lush","judicious","stingy","stop","tire","joke","tough","corn","history","big","lake","hurt","things"];
-
-    }
-
     var PatternLock = function (elementId, customConfiguration) {
         
         let _destinationElement;
@@ -77,6 +71,7 @@ import crypto from "../node_modules/crypto-js/index.js";
         let _mouseButtonDown = false;
         let _lastClickedButton = null;
         let _selectedPattern = [];
+        const _randomWords = ["witty","scratch","sack","tree","assorted","unhealthy","tricky","advertisement","stomach","light","tease","stretch","lush","judicious","stingy","stop","tire","joke","tough","corn","history","big","lake","hurt","things"];
 
         let _configuration = {
             elementId: '',
@@ -153,7 +148,7 @@ import crypto from "../node_modules/crypto-js/index.js";
 
             input = document.createElement("input");
             input.type = 'hidden';
-            input.name = _configuration.destinationInputName
+            input.name = _configuration.destinationInputName;
 
             return input;
         }
@@ -252,9 +247,29 @@ import crypto from "../node_modules/crypto-js/index.js";
             }
         }
 
-        function _postPatten(){
+        function _postPattern(){
             
-            console.log("Button Clicked", index);
+            const hashedPattern = _generatePatternHash();
+            _assignGeneratedHashToInput(hashedPattern);
+        }
+
+        function _generatePatternHash(){
+            var concatenatedString = "";
+
+            _selectedPattern.forEach((value)=>{
+                concatenatedString += _randomWords[value];
+            });
+            
+            const hashedPattern = CryptoJS.SHA1(concatenatedString);
+            const patternInBase64 = hashedPattern.toString(CryptoJS.enc.Base64);
+
+            return patternInBase64;
+
+        }
+
+        function _assignGeneratedHashToInput(hashedPattern){
+            let hiddenInput = document.getElementsByName(_configuration.destinationInputName)[0];
+            hiddenInput.value = hashedPattern;
         }
 
         function _addlistenerToClickEvents(canvas, buttonInfo){
