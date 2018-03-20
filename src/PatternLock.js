@@ -5,6 +5,8 @@
  * Description: Pattern Lock library to emulate Mobile phones lock screen in websites
  * 
  */
+import crypto from "../node_modules/crypto-js/index.js";
+
 (function (global) {
     'use strict';
 
@@ -54,21 +56,18 @@
 
         }
 
-        var _getMousePos= function(canvas, event) {
-            var rect = canvas.getBoundingClientRect();
-            return {
-                x: event.clientX - rect.left,
-                y: event.clientY - rect.top
-            };
-        }
-        
-
         return {
             animationInit:animationInit,
             animationUpdate:animationUpdate,
             animationStop:animationStop
         }
     };
+
+    var PatternEncryptionHadler = function(pattern){
+
+        const randomWords = ["witty","scratch","sack","tree","assorted","unhealthy","tricky","advertisement","stomach","light","tease","stretch","lush","judicious","stingy","stop","tire","joke","tough","corn","history","big","lake","hurt","things"];
+
+    }
 
     var PatternLock = function (elementId, customConfiguration) {
         
