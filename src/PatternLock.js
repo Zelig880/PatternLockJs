@@ -10,7 +10,7 @@ import CryptoJS from "crypto-js"
 (function (global) {
     'use strict';
 
-    var animationHelper = function(canvas){
+    var animationHelper = function(canvas, configuration){
 
         let _animate = false;
         let _startX = null;
@@ -41,8 +41,8 @@ import CryptoJS from "crypto-js"
         var _drawLine = function(mousePosition){
            
             _cleanCanvas();
-            _ctx.strokeStyle = 'blue';
-            _ctx.lineWidth = 5;
+            _ctx.strokeStyle = configuration.strokeStyle
+            _ctx.lineWidth = configuration.lineWidth
             _ctx.beginPath();
             
             _ctx.moveTo(_startX, _startY);
@@ -81,7 +81,9 @@ import CryptoJS from "crypto-js"
             destinationInputName: "PatternLockHiddenInput",
             buttonsRow: 3,
             buttonsColumn: 3,
-            buttonsPadding: 10
+            buttonsPadding: 10,
+            strokeStyle : 'black',
+            lineWidth : 2
         };
 
         if(_elementIdIsValid(elementId))
@@ -331,8 +333,8 @@ import CryptoJS from "crypto-js"
 
         function  _drawLine(startPositionX, StartPositionY, endPositionX, endPositionY){
            
-            _canvasContext.strokeStyle = 'blue';
-            _canvasContext.lineWidth = 5;
+            _canvasContext.strokeStyle = _configuration.strokeStyle;
+            _canvasContext.lineWidth = _configuration.lineWidth;
             _canvasContext.beginPath();
             
             _canvasContext.moveTo(startPositionX, StartPositionY);
@@ -342,11 +344,11 @@ import CryptoJS from "crypto-js"
         
         function _createFilledCircle(buttonInfo){
             _canvasContext.beginPath();
-            _canvasContext.strokeStyle = 'blue';
+            _canvasContext.strokeStyle = _configuration.strokeStyle;
             _canvasContext.arc(buttonInfo.centerX,buttonInfo.centerY,buttonInfo.radius/ 5,0,2*Math.PI);
-            _canvasContext.fillStyle = 'green';
+            _canvasContext.fillStyle = _configuration.strokeStyle;
             _canvasContext.fill();
-            _canvasContext.lineWidth = 5;
+            _canvasContext.lineWidth = _configuration.lineWidth;
             _canvasContext.stroke();
         }
 
