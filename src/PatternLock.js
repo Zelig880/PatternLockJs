@@ -11,8 +11,6 @@ console.log(CanvasHelper);
 (function (global) {
     'use strict';
 
-    
-
     var PatternLock = function (elementId, customConfiguration) {
         
         let _destinationElement;
@@ -33,7 +31,9 @@ console.log(CanvasHelper);
             buttonsColumn: 3,
             buttonsPadding: 10,
             strokeStyle : 'black',
-            lineWidth : 2
+            lineWidth : 2,
+            mainCanvasId: "PatternLock",
+            animationCanvasId: "PatternLockAnimation"
         };
 
         if(_elementIdIsValid(elementId))
@@ -47,23 +47,17 @@ console.log(CanvasHelper);
 
         Object.assign(_configuration, customConfiguration);
         
-        var mainCanvas = _createCanvas("PatterLock");
-        var animationCanvas = _createCanvas("animationCanvas");
+        const _canvasHelper = new CanvasHelper(_configuration);
         var hiddenInput = _createHiddenInput();
 
-        _canvasContext = mainCanvas.getContext("2d");
-        _calculateButtonInfo();
-        _createPatternButtons();
+        _buttonsInfo = _calculateButtonInfo();
+        _canvasHelper.drawMainCanvas(_buttonsInfo);
 
-        _appendToDestinationElement(animationCanvas);
+        const mainCanvas = _canvasHelper.getCanvas(_configuration.mainCanvasId)
+        _appendToDestinationElement(_canvasHelper.getCanvas(_configuration.animationCanvasId));
         _appendToDestinationElement(mainCanvas);
         _appendToDestinationElement(hiddenInput);
         _addlistenerToClickEvents(mainCanvas, _buttonsInfo);
-        const _animationHelper = new CanvasHelper(animationCanvas, _configuration);
-
-        function getConfig(){
-            return _configuration;
-        }
 
         function _elementIdIsValid(){
 
@@ -79,20 +73,6 @@ console.log(CanvasHelper);
             }
 
             return true;
-        }
-
-        function _createCanvas(id){
-            var canvas;
-            
-            canvas = document.createElement('canvas');
-            canvas.id     = id;
-            canvas.width  = _configuration.canvasWidth;
-            canvas.height = _configuration.canvasHeight;
-            canvas.style.zIndex   = 100;
-            canvas.style.position = "absolute";
-            canvas.style.border   = _configuration.canvasBorder;
-
-            return canvas;
         }
 
         function _createHiddenInput(){
@@ -111,30 +91,19 @@ console.log(CanvasHelper);
 
         function _calculateButtonInfo(){
 
+            let buttonInfo = [];
+
             for (let row = 0; row < _configuration.buttonsRow; row++) {
                 
                 for (let column = 0; column < _configuration.buttonsColumn; column++) {
                 
-                    _buttonsInfo.push(_calculateButtonPositionAndSize(row, column));
+                    buttonInfo.push(_calculateButtonPositionAndSize(row, column));
 
                 }
                 
             }
-        }
 
-        function _createPatternButtons(){
-            
-                for (let i = 0; i < _buttonsInfo.length; i++) {
-                
-                    _createPatternButton(_buttonsInfo[i]);
-
-                }
-        }
-
-        function _createPatternButton(buttonInfo){
-            _canvasContext.beginPath();
-            _canvasContext.arc(buttonInfo.centerX,buttonInfo.centerY,buttonInfo.radius,0,2*Math.PI);
-            _canvasContext.stroke();
+            return buttonInfo;
         }
 
         function _calculateButtonPositionAndSize(row, column){
@@ -187,12 +156,12 @@ console.log(CanvasHelper);
 
                 if(_lastClickedButton !== null){
                     var lastButton = _buttonsInfo[_lastClickedButton];
-                    _drawLine(lastButton.centerX, lastButton.centerY, button.centerX, button.centerY );
-                    _animationHelper.animationStop();
+                    _canvasHelper.drawLineBetweenbuttons(lastButton.centerX, lastButton.centerY, button.centerX, button.centerY );
+                    _canvasHelper.animationStop();
 
                 }
-                _createFilledCircle(button);
-                _animationHelper.animationInit(button.centerX, button.centerY);
+                _canvasHelper.createFilledCircle(button);
+                _canvasHelper.animationInit(button.centerX, button.centerY);
 
                 _lastClickedButton = index;
                 console.log("Button Clicked", index);
@@ -256,7 +225,7 @@ console.log(CanvasHelper);
                 
                 if(!_mouseButtonDown) return;
 
-                _animationHelper.animationUpdate(mousePos);
+                _canvasHelper.animationUpdate(mousePos);
                 buttonInfo.forEach(function(button, index) {
 
                     if(_isButton(mousePos, button)){
@@ -275,38 +244,13 @@ console.log(CanvasHelper);
             canvas.addEventListener('mouseup', function(evt) {
                 var mousePos = _getMousePos(canvas, evt);
                 _mouseButtonDown = false;
-                _animationHelper.animationStop();
+                _canvasHelper.animationStop();
                 _postPattern();
 
             }, false);
         }
 
-        function  _drawLine(startPositionX, StartPositionY, endPositionX, endPositionY){
-           
-            _canvasContext.strokeStyle = _configuration.strokeStyle;
-            _canvasContext.lineWidth = _configuration.lineWidth;
-            _canvasContext.beginPath();
-            
-            _canvasContext.moveTo(startPositionX, StartPositionY);
-            _canvasContext.lineTo(endPositionX, endPositionY);
-            _canvasContext.stroke();
-        }
-        
-        function _createFilledCircle(buttonInfo){
-            _canvasContext.beginPath();
-            _canvasContext.strokeStyle = _configuration.strokeStyle;
-            _canvasContext.arc(buttonInfo.centerX,buttonInfo.centerY,buttonInfo.radius/ 5,0,2*Math.PI);
-            _canvasContext.fillStyle = _configuration.strokeStyle;
-            _canvasContext.fill();
-            _canvasContext.lineWidth = _configuration.lineWidth;
-            _canvasContext.stroke();
-        }
-
-        return {
-            getConfig: getConfig
-        }
     };
-
 
     if (typeof define === 'function' && define.amd) {
         define(function () { return PatternLock; });
