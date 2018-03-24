@@ -2,7 +2,7 @@
   "name": "pattern-lock-js",
   "version": "1.0.0",
   "description": "Easy to use Pattern Lock library to emulate mobile phones lock screens",
-  "main": "index.js",
+  "main": "src/PatternLock.js",
   "scripts": {
     "test": "jasmine",
     "webpack": "webpack --watch"
