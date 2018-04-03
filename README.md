@@ -28,8 +28,11 @@ var patternLockInstance = PatternLock("patternLock");
 
 When a pattern is completed the value of an hidden field with the default name of PatternLockHiddenInput (can be changed by overriding config) is set.
 
+![alt text](https://github.com/Zelig880/PatternLockJs/patternLockVideo.gif.gif "Example usage video of the pattern lock")
+
 ## To DO
 
 - Unit Test
-(COMPLETED)Move All Canvas methods in its own file
-- Add Examples usage
+- (COMPLETED)Move All Canvas methods in its own file
+- (COMPLETED) Add Examples usage video
+- Provide callback on pattern completition
